@@ -106,7 +106,7 @@ def find_small_collections(server_root: str) -> list[dict[str, str | int | None]
     done: bool = False
 
     with httpx.Client(timeout=10.0) as httpx_client:
-        while not done and checked < MAX_COLLECTIONS_TO_CHECK and len(results) <= COLLECTIONS_TO_GATHER_SIZE:
+        while not done and checked < MAX_COLLECTIONS_TO_CHECK and len(results) < COLLECTIONS_TO_GATHER_SIZE:
             batch: list[dict[str, str | None]] = fetch_collections_batch(httpx_client, server_root, start)
             if not batch:
                 log.info('No more collections returned by server.')
