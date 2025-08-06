@@ -17,15 +17,15 @@ The API url is public; the reason for it is to make dev testing easier.
 
 import logging
 import os
-import pprint
 import sys
 import time
 from typing import Any
 
 import httpx
 
+level: int = logging.DEBUG if os.getenv('LOG_LEVEL') == 'DEBUG' else logging.INFO  # 10 (debug) or 20 (info)
 logging.basicConfig(
-    level=logging.INFO,
+    level=level,
     format='%(asctime)s - %(levelname)s - %(message)s',
     stream=sys.stdout,
 )
@@ -48,6 +48,8 @@ def fetch_collections_batch(client: httpx.Client, server_root: str, start: int) 
     Returns a list of dictionaries, each containing at least 'id' and possibly 'name' for a collection.
     Raises for HTTP errors.
 
+    Returns a list of collection-info dictionaries.
+
     Called by find_small_collections() manager.
     """
     log.info(f'Fetching collections batch starting at {start}')
@@ -60,7 +62,6 @@ def fetch_collections_batch(client: httpx.Client, server_root: str, start: int) 
     resp.raise_for_status()
     data: dict[str, Any] = resp.json()
     collections_data: list[dict[str, str | None]] = data.get('collections', [])
-    log.debug(f'collections_data, ``{pprint.pformat(collections_data)}``')
     return collections_data
 
 
@@ -83,7 +84,7 @@ def fetch_collection_item_count(
     resp.raise_for_status()
     data: dict[str, Any] = resp.json()
     item_count: int | None = data.get('response', {}).get('numFound')
-    log.debug(f'item_count, ``{item_count}``')
+    # log.info(f'item_count, ``{item_count}``')
     return item_count
 
 
