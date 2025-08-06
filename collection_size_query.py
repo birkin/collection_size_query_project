@@ -88,64 +88,6 @@ def fetch_collection_item_count(
     return data.get("response", {}).get("numFound")
 
 
-# def find_small_collections(server_root: str) -> list[CollectionInfo]:
-#     """
-#     Iterates through batches of collections, checking up to `max_to_check` collections,
-#     and finds those with an item count between `min_items` and `max_items` (inclusive).
-#     Stops after finding more than `GATHER_SIZE` matches or reaching the check limit.
-#     For each qualifying collection, includes its ID, name, and item count in the result.
-#     Sleeps between item count requests to avoid overloading the server.
-#     """
-#     results: list[CollectionInfo] = []
-#     checked = 0
-#     start = 0
-
-#     with httpx.Client(timeout=10.0) as httpx_client:
-#         while checked < MAX_COLLECTIONS_TO_CHECK and len(results) <= GATHER_SIZE:
-#             batch = fetch_collections_batch(httpx_client, server_root, start)
-#             if not batch:
-#                 logger.info("No more collections returned by server.")
-#                 break
-
-#             for summary in batch:
-#                 if len(results) > GATHER_SIZE or checked >= MAX_COLLECTIONS_TO_CHECK:
-#                     logger.info(
-#                         "Enough small collections found or reached check limit, stopping."
-#                     )
-#                     return results
-
-#                 collection_id = summary["id"]
-#                 name = summary.get("name")
-#                 time.sleep(SLEEP_TIME)
-#                 try:
-#                     count = fetch_collection_item_count(
-#                         httpx_client, server_root, collection_id
-#                     )
-#                     if count is None:
-#                         logger.warning(f"No count returned for {collection_id}")
-#                         continue
-#                     logger.info(f"Collection {collection_id}: {count} items")
-#                     if (
-#                         MIN_ITEMS_CONSIDERED_SMALL
-#                         <= count
-#                         <= MAX_ITEMS_CONSIDERED_SMALL
-#                     ):
-#                         result = {"id": collection_id, "name": name, "count": count}
-#                         results.append(result)
-#                         logger.info(
-#                             f"Collection {collection_id} added to results (count: {count})"
-#                         )
-#                 except Exception as e:
-#                     logger.error(
-#                         f"Error processing collection {collection_id}: {str(e)}"
-#                     )
-#                 checked += 1
-
-#             start += COLLECTIONS_PER_BATCH_SIZE
-
-#     return results
-
-
 def find_small_collections(server_root: str) -> list[CollectionInfo]:
     """
     Iterates through batches of collections, checking up to `max_to_check` collections,
