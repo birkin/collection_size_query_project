@@ -12,7 +12,7 @@ Usage:
     uv run --env-file ../.env ./collection_size_query.py
 
 The `.env` sets the `SERVER_ROOT`, for production is `SERVER_ROOT="https://repository.library.brown.edu/"`.
-The reason for it is to make dev testing easier.
+The API url is public; the reason for it is to make dev testing easier.
 """
 
 import logging
@@ -52,13 +52,11 @@ class CollectionInfo(TypedDict):
 
 
 def fetch_collections_batch(
-    client: httpx.Client,
-    server_root: str,
-    start: int,
+    client: httpx.Client, server_root: str, start: int
 ) -> list[CollectionSummary]:
     """
     Retrieves a single batch (page) of collection summaries from the collections API endpoint.
-    The batch is determined by the `start` offset and `page_size`.
+    The batch is determined by the `start` offset and COLLECTIONS_PER_BATCH_SIZE.
     Returns a list of dictionaries, each containing at least 'id' and possibly 'name' for a collection.
     Raises for HTTP errors.
     """
@@ -88,8 +86,6 @@ def fetch_collection_item_count(
     resp.raise_for_status()
     data = resp.json()
     return data.get("response", {}).get("numFound")
-
-
 
 
 def find_small_collections(server_root: str) -> list[CollectionInfo]:
