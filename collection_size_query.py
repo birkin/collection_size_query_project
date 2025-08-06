@@ -19,7 +19,6 @@ import logging
 import os
 import sys
 import time
-from typing import TypedDict
 
 import httpx
 
@@ -40,17 +39,6 @@ MAX_COLLECTIONS_TO_CHECK = 200  # max collections to check
 GATHER_SIZE = 2  # number of collections to gather
 
 
-# class CollectionSummary(TypedDict):
-#     id: str
-#     name: str | None
-
-
-class CollectionInfo(TypedDict):
-    id: str
-    name: str | None
-    count: int
-
-
 def fetch_collections_batch(client: httpx.Client, server_root: str, start: int) -> list:
     """
     Retrieves a single batch (page) of collection summaries from the collections API endpoint.
@@ -58,7 +46,7 @@ def fetch_collections_batch(client: httpx.Client, server_root: str, start: int) 
     Returns a list of dictionaries, each containing at least 'id' and possibly 'name' for a collection.
     Raises for HTTP errors.
 
-    Called by find_small_collections().
+    Called by find_small_collections() manager.
     """
     logger.info(f"Fetching collections batch starting at {start}")
     url = f"{server_root}/api/collections/"
@@ -78,6 +66,8 @@ def fetch_collection_item_count(
     Submits a query to the search API for the given collection ID to retrieve the number of items in that collection.
     Returns the item count as an integer, or None if not present in the response.
     Raises for HTTP errors.
+
+    Called by find_small_collections() manager.
     """
     q = f'rel_is_member_of_collection_ssim:"{collection_id}"'
     url = f"{server_root}/api/search/"
@@ -88,15 +78,19 @@ def fetch_collection_item_count(
     return data.get("response", {}).get("numFound")
 
 
-def find_small_collections(server_root: str) -> list[CollectionInfo]:
+def find_small_collections(server_root: str) -> list:
     """
+    Manager function.
+
     Iterates through batches of collections, checking up to `max_to_check` collections,
     and finds those with an item count between `min_items` and `max_items` (inclusive).
     Stops after finding more than `GATHER_SIZE` matches or reaching the check limit.
     For each qualifying collection, includes its ID, name, and item count in the result.
     Sleeps between item count requests to avoid overloading the server.
+
+    Called by dundermain.
     """
-    results: list[CollectionInfo] = []
+    results: list = []
     checked = 0
     start = 0
     done = False
