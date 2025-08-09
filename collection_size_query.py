@@ -12,7 +12,7 @@ Usage:
     uv run --env-file ../.env ./collection_size_query.py
 
 The `.env` sets the `SERVER_ROOT`, for production is `SERVER_ROOT="https://repository.library.brown.edu/"`.
-The API url is public; the reason for it is to make dev testing easier.
+The API url is public; the reason for the `.env` is to make dev testing easier.
 """
 
 import logging
@@ -38,7 +38,7 @@ MIN_ITEMS_CONSIDERED_SMALL: int = 5  # min items for a collection to be consider
 MAX_ITEMS_CONSIDERED_SMALL: int = 50  # max items in a collection to consider it small
 COLLECTIONS_PER_BATCH_SIZE: int = 100  # collections per batch
 MAX_COLLECTIONS_TO_CHECK: int = 200  # max collections to check
-COLLECTIONS_TO_GATHER_SIZE: int = 2  # number of collections to gather
+COLLECTIONS_TO_GATHER_SIZE: int = 20  # number of collections to gather
 
 
 def fetch_collections_batch(client: httpx.Client, server_root: str, start: int) -> list[dict[str, str | None]]:
